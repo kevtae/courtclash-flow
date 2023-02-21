@@ -1,0 +1,17 @@
+{
+  "networks": {
+    "emulator": "127.0.0.1:3569",
+    "mainnet": "access.mainnet.nodes.onflow.org:9000",
+    "sandboxnet": "access.sandboxnet.nodes.onflow.org:9000",
+    "testnet": "access.devnet.nodes.onflow.org:9000"
+  },
+  "accounts": {
+    "emulator-account": {
+      "address": "1d93c9c036257980",
+      "key": "6c03890394f94baac4934044345ac59542436ad3e2082f140dddc424f13a30f4"
+    },
+    "testing": {
+      "fromFile": "testing.private.json"
+    }
+  }
+}
