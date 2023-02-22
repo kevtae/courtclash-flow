@@ -36,8 +36,12 @@ func CreateChallenge(c *fiber.Ctx) error {
 	}
 
 	newChallenge := models.Challenge{
-		VideoLink: challenge.VideoLink,
-		Ended:     false,
+		VideoLink:     challenge.VideoLink,
+		Ended:         false,
+		Name:          challenge.Name,
+		ChallengeType: challenge.ChallengeType,
+		Link:          challenge.Link,
+		Description:   challenge.Description,
 	}
 
 	result, err := challengeCollection.InsertOne(ctx, newChallenge)
