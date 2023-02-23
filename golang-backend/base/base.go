@@ -261,13 +261,6 @@ func CreateAccount(flowClient access.Client, publicKeys []*flow.AccountKey) *flo
 	return CreateAccountWithContracts(flowClient, publicKeys, nil)
 }
 
-func Handle(err error) {
-	if err != nil {
-		fmt.Println("err:", err.Error())
-		panic(err)
-	}
-}
-
 func NewFlowGRPCClient() *grpc.Client {
 	c, err := grpc.NewClient(grpc.EmulatorHost)
 	Handle(err)
@@ -275,14 +268,16 @@ func NewFlowGRPCClient() *grpc.Client {
 }
 
 func WaitForSeal(ctx context.Context, c access.Client, id flow.Identifier) *flow.TransactionResult {
+
 	result, err := c.GetTransactionResult(ctx, id)
 	Handle(err)
 
 	fmt.Printf("Waiting for transaction %s to be sealed...\n", id)
 
 	for result.Status != flow.TransactionStatusSealed {
-		time.Sleep(time.Second)
-		fmt.Print(".")
+		// sleep for 5 seconds
+		time.Sleep(5 * time.Second)
+
 		result, err = c.GetTransactionResult(ctx, id)
 		Handle(err)
 	}
@@ -290,4 +285,11 @@ func WaitForSeal(ctx context.Context, c access.Client, id flow.Identifier) *flow
 	fmt.Println()
 	fmt.Printf("Transaction %s sealed\n", id)
 	return result
+}
+
+func Handle(err error) {
+	if err != nil {
+		fmt.Println("err:", err.Error())
+		panic(err)
+	}
 }

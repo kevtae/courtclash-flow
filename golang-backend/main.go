@@ -19,6 +19,7 @@ func main() {
 
 	routes.UserRoute(app)
 	routes.ChallengeRoute(app)
+	routes.CircleRoute(app)
 
 	app.Listen(":6000")
 }

@@ -21,7 +21,6 @@ import (
 
 	"go.mongodb.org/mongo-driver/mongo"
 
-	"github.com/onflow/flow-go-sdk/access"
 	"github.com/onflow/flow-go-sdk/access/http"
 	"github.com/onflow/flow-go-sdk/crypto"
 
@@ -82,7 +81,7 @@ func CreateAccount() (string, crypto.PrivateKey) {
 
 	ctx := context.Background()
 	flowClient, err := http.NewClient(http.TestnetHost)
-	Handle(err)
+	base.Handle(err)
 
 	fmt.Println("Flow client:, ctx:", ctx, flowClient)
 
@@ -130,7 +129,7 @@ func CreateAccount() (string, crypto.PrivateKey) {
 
 	time.Sleep(10 * time.Second)
 
-	accountCreationTxRes := WaitForSeal(ctx, flowClient, createAccountTx.ID())
+	accountCreationTxRes := base.WaitForSeal(ctx, flowClient, createAccountTx.ID())
 
 	var myAddress flow.Address
 
@@ -145,33 +144,6 @@ func CreateAccount() (string, crypto.PrivateKey) {
 
 	// fmt.Println("Account created with address:", myAddress.Hex())
 
-}
-
-func WaitForSeal(ctx context.Context, c access.Client, id flow.Identifier) *flow.TransactionResult {
-
-	result, err := c.GetTransactionResult(ctx, id)
-	Handle(err)
-
-	fmt.Printf("Waiting for transaction %s to be sealed...\n", id)
-
-	for result.Status != flow.TransactionStatusSealed {
-		// sleep for 5 seconds
-		time.Sleep(5 * time.Second)
-
-		result, err = c.GetTransactionResult(ctx, id)
-		Handle(err)
-	}
-
-	fmt.Println()
-	fmt.Printf("Transaction %s sealed\n", id)
-	return result
-}
-
-func Handle(err error) {
-	if err != nil {
-		fmt.Println("err:", err.Error())
-		panic(err)
-	}
 }
 
 /*
