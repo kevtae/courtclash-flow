@@ -14,6 +14,7 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
@@ -35,9 +36,17 @@ func CreateChallenge(c *fiber.Ctx) error {
 		return c.Status(http.StatusBadRequest).JSON(responses.UserResponse{Status: http.StatusBadRequest, Message: "error", Data: &fiber.Map{"data": validationErr.Error()}})
 	}
 
+	objectID := primitive.NewObjectID()
+
 	newChallenge := models.Challenge{
-		VideoLink: challenge.VideoLink,
-		Ended:     false,
+		ID:            objectID,
+		VideoLink:     challenge.VideoLink,
+		Ended:         false,
+		Name:          challenge.Name,
+		ChallengeType: challenge.ChallengeType,
+		Link:          challenge.Link,
+		Description:   challenge.Description,
+		Image:         challenge.Image,
 	}
 
 	result, err := challengeCollection.InsertOne(ctx, newChallenge)
