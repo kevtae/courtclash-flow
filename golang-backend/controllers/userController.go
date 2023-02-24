@@ -19,6 +19,7 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
 
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 
 	"github.com/onflow/flow-go-sdk/access/http"
@@ -45,6 +46,7 @@ const authBearer = "Bearer"
 var magicSDK = magicClient.New("sk_live_E0AB0A0BECCA2010", magic.NewDefaultClient())
 
 func CreateUser(c *fiber.Ctx) error {
+	// var wg sync.WaitGroup
 
 	// m := magicClient.New("sk_live_E0AB0A0BECCA2010", magic.NewDefaultClient())
 	// userInfo, err := m.User.GetMetadataByToken("<DID_TOKEN>")
@@ -58,26 +60,46 @@ func CreateUser(c *fiber.Ctx) error {
 		return c.Status(httpp.StatusBadRequest).JSON(responses.UserResponse{Status: httpp.StatusBadRequest, Message: "error", Data: &fiber.Map{"data": err.Error()}})
 	}
 
-	//use the validator library to validate required fields
-	if validationErr := validate.Struct(&user); validationErr != nil {
-		return c.Status(httpp.StatusBadRequest).JSON(responses.UserResponse{Status: httpp.StatusBadRequest, Message: "error", Data: &fiber.Map{"data": validationErr.Error()}})
-	}
+	// //use the validator library to validate required fields
+	// if validationErr := validate.Struct(&user); validationErr != nil {
+	// 	return c.Status(httpp.StatusBadRequest).JSON(responses.UserResponse{Status: httpp.StatusBadRequest, Message: "error", Data: &fiber.Map{"data": validationErr.Error()}})
+	// }
+
+	var address string = "8016330a12a3c866"
+	var key string = "0x4b2a52cc51fceffb2004d09edd26bee80d53f8ff3db969f513aa0a73cf4a960d"
+
+	// Add a counter to the WaitGroup.
+	// wg.Add(1)
+	// go func() {
+	// 	defer wg.Done()
+
+	// 	// Call your function here.
+	// 	address, key = CreateAccount()
+	// }()
+
+	// // Wait for the function to finish.
+	// wg.Wait()
+
+	fmt.Println("Address:", address, "key:", key)
+
+	objectID := primitive.NewObjectID()
 
 	newUser := models.User{
-		Address:    user.Address,
-		PrivateKey: user.PrivateKey,
+		ID:         objectID,
+		Address:    address,
+		PrivateKey: key,
 		Email:      user.Email}
 
 	result, err := userCollection.InsertOne(ctx, newUser)
+
 	if err != nil {
 		return c.Status(httpp.StatusInternalServerError).JSON(responses.UserResponse{Status: httpp.StatusInternalServerError, Message: "error", Data: &fiber.Map{"data": err.Error()}})
-
 	}
 
 	return c.Status(httpp.StatusCreated).JSON(responses.UserResponse{Status: httpp.StatusCreated, Message: "success", Data: &fiber.Map{"data": result}})
 }
 
-func CreateAccount() (string, crypto.PrivateKey) {
+func CreateAccount() (string, string) {
 
 	ctx := context.Background()
 	flowClient, err := http.NewClient(http.TestnetHost)
@@ -127,7 +149,7 @@ func CreateAccount() (string, crypto.PrivateKey) {
 	//print the latest block height
 	fmt.Println("Latest block height:", latestBlock.Height)
 
-	time.Sleep(10 * time.Second)
+	time.Sleep(7 * time.Second)
 
 	accountCreationTxRes := base.WaitForSeal(ctx, flowClient, createAccountTx.ID())
 
@@ -140,7 +162,7 @@ func CreateAccount() (string, crypto.PrivateKey) {
 		}
 	}
 
-	return myAddress.Hex(), myPrivateKey
+	return myAddress.Hex(), myPrivateKey.String()
 
 	// fmt.Println("Account created with address:", myAddress.Hex())
 
