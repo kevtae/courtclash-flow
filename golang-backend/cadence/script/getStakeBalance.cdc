@@ -1,7 +1,7 @@
-import StakingV7 from 0x053625ce33348c06
+import StakingV7 from 0xf3ecf4159841b043
 
 
-// Get staking balance
+// Get vault balance
 
 pub fun main(): UFix64  {
 

@@ -15,92 +15,6 @@ import (
 	HTTPP "github.com/onflow/flow-go-sdk/access/http"
 )
 
-// func CreateWalletCircle(c *fiber.Ctx) error {
-// 	id := uuid.New()
-
-// 	url := "https://api-sandbox.circle.com/v1/wallets"
-
-// 	payload := strings.NewReader(fmt.Sprintf("{\"idempotencyKey\":\"%s\"}", id.String()))
-
-// 	req, _ := http.NewRequest("POST", url, payload)
-
-// 	req.Header.Add("accept", "application/json")
-// 	req.Header.Add("content-type", "application/json")
-
-// 	token := os.Getenv("CIRCLE")
-
-// 	req.Header.Add("authorization", fmt.Sprintf("Bearer %s", token))
-
-// 	res, _ := http.DefaultClient.Do(req)
-
-// 	defer res.Body.Close()
-// 	body, _ := ioutil.ReadAll(res.Body)
-
-// 	fmt.Println(res)
-// 	fmt.Println(string(body))
-
-// 	return c.Status(http.StatusOK).JSON(responses.UserResponse{
-// 		Status:  http.StatusOK,
-// 		Message: "success",
-// 		Data:    &fiber.Map{"data": string(body)},
-// 	})
-
-// }
-
-// // func CreateDepositAddress(c *fiber.Ctx) error {
-// // 	newUUID := uuid.New().String()
-
-// // 	url := "https://api-sandbox.circle.com/v1/businessAccount/wallets/addresses/deposit"
-
-// // 	payload := strings.NewReader("{\"chain\":\"FLOW\",\"idempotencyKey\":\"" + newUUID + "\",\"currency\":\"USD\"}")
-
-// // 	req, _ := http.NewRequest("POST", url, payload)
-
-// // 	req.Header.Add("accept", "application/json")
-// // 	req.Header.Add("content-type", "application/json")
-// // 	req.Header.Add("authorization", "Bearer QVBJX0tFWTo3NDlhNTMxNzdjZWI1YzRiMWMyN2MyMzQ4YzBmMDQ2Mjo5ZGFmMWFmMGYwYzFlY2MzOTcwYzI0ZjkxOTdmNjdhNQ==")
-
-// // 	res, _ := http.DefaultClient.Do(req)
-
-// // 	defer res.Body.Close()
-// // 	body, _ := ioutil.ReadAll(res.Body)
-
-// // 	fmt.Println(res)
-// // 	fmt.Println(string(body))
-
-// // 	return c.Status(http.StatusOK).JSON(responses.UserResponse{
-// // 		Status:  http.StatusOK,
-// // 		Message: "success",
-// // 		Data:    &fiber.Map{"data": string(body)},
-// // 	})
-// // }
-
-// func CreateDepositAddress(c *fiber.Ctx) error {
-// 	url := "https://api-sandbox.circle.com/v1/businessAccount/wallets/addresses/deposit"
-
-// 	payload := strings.NewReader("{\"idempotencyKey\":\"559fb89d-ab85-4060-9fe2-88ed9fce7478\",\"chain\":\"FLOW\",\"currency\":\"USD\"}")
-
-// 	req, _ := http.NewRequest("POST", url, payload)
-
-// 	req.Header.Add("accept", "application/json")
-// 	req.Header.Add("content-type", "application/json")
-// 	req.Header.Add("authorization", "Bearer QVBJX0tFWTo3NDlhNTMxNzdjZWI1YzRiMWMyN2MyMzQ4YzBmMDQ2Mjo5ZGFmMWFmMGYwYzFlY2MzOTcwYzI0ZjkxOTdmNjdhNQ==")
-
-// 	res, _ := http.DefaultClient.Do(req)
-
-// 	defer res.Body.Close()
-// 	body, _ := ioutil.ReadAll(res.Body)
-
-// 	fmt.Println(res)
-// 	fmt.Println(string(body))
-
-// 	return c.Status(http.StatusOK).JSON(responses.UserResponse{
-// 		Status:  http.StatusOK,
-// 		Message: "success",
-// 		Data:    &fiber.Map{"data": string(body)},
-// 	})
-// }
-
 // send transaction to flow wallet of usdc
 func SetupVault(c *fiber.Ctx) error {
 	// Connect to the Flow testnet
@@ -268,5 +182,32 @@ func TransferUSDC(c *fiber.Ctx) error {
 	fmt.Println("Transaction status:", transactionRes.Status)
 
 	return c.Status(http.StatusCreated).JSON(responses.UserResponse{Status: http.StatusCreated, Message: "success", Data: &fiber.Map{"data": transactionRes}})
+
+}
+
+func GetBalance(c *fiber.Ctx) error {
+
+	// Connect to the Flow testnet
+	ctx := context.Background()
+	flowClient, err := HTTPP.NewClient(HTTPP.TestnetHost)
+	base.Handle(err)
+
+	script := []byte(`
+	import StakingV7 from 0xf3ecf4159841b043
+
+		pub fun main(): UFix64  {
+		
+		
+			return StakingV7.getStakeBalance()
+		
+		}
+	`)
+
+	balanceRes, err := flowClient.ExecuteScriptAtLatestBlock(ctx, script, nil)
+	base.Handle(err)
+
+	fmt.Println("Transaction status:", balanceRes)
+
+	return c.Status(http.StatusCreated).JSON(responses.UserResponse{Status: http.StatusCreated, Message: "success", Data: &fiber.Map{"data": balanceRes}})
 
 }

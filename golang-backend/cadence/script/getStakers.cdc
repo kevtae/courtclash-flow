@@ -1,4 +1,4 @@
-import StakingV7 from 0x053625ce33348c06
+import StakingV7 from 0xf3ecf4159841b043
 
 
 // This script allows you to get all the stakers in the staking contract

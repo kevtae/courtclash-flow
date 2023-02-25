@@ -5,17 +5,23 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"golang-backend/base"
+
 	"golang-backend/configs"
 	"golang-backend/models"
 	"golang-backend/responses"
 	"net/http"
 	"time"
 
+	"github.com/onflow/flow-go-sdk"
+
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
+
+	HTTPP "github.com/onflow/flow-go-sdk/access/http"
 )
 
 var challengeCollection *mongo.Collection = configs.GetCollection(configs.DB, "challenges")
@@ -97,5 +103,77 @@ func GetAllChallenges(c *fiber.Ctx) error {
 		Message: "success",
 		Data:    data,
 	})
+
+}
+
+func EndChallenge(c *fiber.Ctx) error {
+
+	ctx := context.Background()
+
+	flowClient, err := HTTPP.NewClient(HTTPP.TestnetHost)
+	base.Handle(err)
+
+	serviceAcctAddr, serviceAcctKey, serviceSigner := base.ServiceAccount(flowClient)
+
+	transaction := flow.NewTransaction().
+		SetScript([]byte(`
+		import FungibleToken from 0x9a0766d93b6608b7
+		import FiatToken from 0xa983fecbed621163
+		import StakingV7 from 0xf3ecf4159841b043
+		
+		
+		//distribute the stake once the challenge ends
+		//only can be called by the admin
+		transaction() {
+		
+		
+			prepare(admin: AuthAccount) {
+				let adminRef = admin.borrow<&StakingV7.Administrator>(from: /storage/StakingAdministrator)!
+		
+		
+				adminRef.distributeStake()
+		
+			}
+		
+		}
+		
+
+	`))
+
+	referenceBlockID := base.GetReferenceBlockId(flowClient)
+
+	transaction.SetProposalKey(
+		serviceAcctAddr,
+		serviceAcctKey.Index,
+		serviceAcctKey.SequenceNumber,
+	)
+	transaction.SetReferenceBlockID(referenceBlockID)
+	transaction.SetPayer(serviceAcctAddr)
+	transaction.AddAuthorizer(serviceAcctAddr)
+
+	// Sign the transaction with the service account, which already exists
+	// All new accounts must be created by an existing account
+	err = transaction.SignEnvelope(serviceAcctAddr, serviceAcctKey.Index, serviceSigner)
+	base.Handle(err)
+
+	// Send the transaction to the network
+	err = flowClient.SendTransaction(ctx, *transaction)
+	base.Handle(err)
+
+	fmt.Println("ID", transaction.ID())
+
+	// get latest block height
+	latestBlock, err := flowClient.GetLatestBlock(ctx, true)
+
+	//print the latest block height
+	fmt.Println("Latest block height:", latestBlock.Height)
+
+	time.Sleep(7 * time.Second)
+
+	transactionRes := base.WaitForSeal(ctx, flowClient, transaction.ID())
+
+	fmt.Println("Transaction status:", transactionRes.Status)
+
+	return c.Status(http.StatusCreated).JSON(responses.SimpleResponse{Status: http.StatusOK})
 
 }

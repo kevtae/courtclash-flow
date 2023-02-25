@@ -9,8 +9,7 @@ import (
 func ChallengeRoute(app *fiber.App) {
 	app.Post("/challenge", controllers.CreateChallenge)
 	app.Get("/challenge", controllers.GetAllChallenges)
-	// app.Get("/user/:userId", controllers.GetAUser)
-	// app.Put("/user/:userId", controllers.EditAUser)
-	// app.Delete("/user/:userId", controllers.DeleteAUser)
-	// app.Get("/users", controllers.GetAllUsers)
+	app.Post("/verify-submission", controllers.VerfiySubmission)
+	app.Get("/get-total-stake", controllers.GetBalance)
+	app.Get("/end-challenge", controllers.EndChallenge)
 }

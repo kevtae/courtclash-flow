@@ -1,0 +1,14 @@
+{
+  "accounts": {
+    "acc3": {
+      "address": "f3ecf4159841b043",
+      "key": {
+        "type": "hex",
+        "index": 0,
+        "signatureAlgorithm": "ECDSA_P256",
+        "hashAlgorithm": "SHA3_256",
+        "privateKey": "f4caa15533139ec58e67caaf9094682fc5c9777809b45c08ea0e801c8a5aa468"
+      }
+    }
+  }
+}
