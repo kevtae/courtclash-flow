@@ -1,6 +1,7 @@
 import FungibleToken from 0x9a0766d93b6608b7
 import FiatToken from 0xa983fecbed621163
 
+// transfer USDC from one acc to another
 transaction(amount: UFix64, to: Address) {
 
     // The Vault resource that holds the tokens that are being transferred
@@ -30,3 +31,5 @@ transaction(amount: UFix64, to: Address) {
         receiverRef.deposit(from: <-self.sentVault)
     }
 }
+
+//// flow transactions send transferUSDC.cdc "1.00000000" "0x1848726466b5f84e" -n testnet --signer acc1

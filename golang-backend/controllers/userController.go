@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"strings"
+	"sync"
 
 	"golang-backend/base"
 
@@ -27,6 +28,8 @@ import (
 
 	"github.com/onflow/flow-go-sdk/templates"
 
+	"go.mongodb.org/mongo-driver/bson"
+
 	"github.com/onflow/flow-go-sdk"
 
 	"github.com/magiclabs/magic-admin-go"
@@ -46,12 +49,12 @@ const authBearer = "Bearer"
 var magicSDK = magicClient.New("sk_live_E0AB0A0BECCA2010", magic.NewDefaultClient())
 
 func CreateUser(c *fiber.Ctx) error {
-	// var wg sync.WaitGroup
+	var wg sync.WaitGroup
 
 	// m := magicClient.New("sk_live_E0AB0A0BECCA2010", magic.NewDefaultClient())
 	// userInfo, err := m.User.GetMetadataByToken("<DID_TOKEN>")
 
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
 	var user models.User
 	defer cancel()
 
@@ -65,20 +68,20 @@ func CreateUser(c *fiber.Ctx) error {
 	// 	return c.Status(httpp.StatusBadRequest).JSON(responses.UserResponse{Status: httpp.StatusBadRequest, Message: "error", Data: &fiber.Map{"data": validationErr.Error()}})
 	// }
 
-	var address string = "8016330a12a3c866"
-	var key string = "0x4b2a52cc51fceffb2004d09edd26bee80d53f8ff3db969f513aa0a73cf4a960d"
+	var address string
+	var key string
 
 	// Add a counter to the WaitGroup.
-	// wg.Add(1)
-	// go func() {
-	// 	defer wg.Done()
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
 
-	// 	// Call your function here.
-	// 	address, key = CreateAccount()
-	// }()
+		// Call your function here.
+		address, key = CreateAccount()
+	}()
 
-	// // Wait for the function to finish.
-	// wg.Wait()
+	// Wait for the function to finish.
+	wg.Wait()
 
 	fmt.Println("Address:", address, "key:", key)
 
@@ -87,16 +90,25 @@ func CreateUser(c *fiber.Ctx) error {
 	newUser := models.User{
 		ID:         objectID,
 		Address:    address,
-		PrivateKey: key,
+		PrivateKey: key[2:],
 		Email:      user.Email}
 
 	result, err := userCollection.InsertOne(ctx, newUser)
+
+	insertedID := result.InsertedID
+
+	// Retrieve the inserted document from the collection using its ID
+	var insertedDoc models.User
+	err = userCollection.FindOne(ctx, bson.M{"_id": insertedID}).Decode(&insertedDoc)
+	if err != nil {
+		panic(err)
+	}
 
 	if err != nil {
 		return c.Status(httpp.StatusInternalServerError).JSON(responses.UserResponse{Status: httpp.StatusInternalServerError, Message: "error", Data: &fiber.Map{"data": err.Error()}})
 	}
 
-	return c.Status(httpp.StatusCreated).JSON(responses.UserResponse{Status: httpp.StatusCreated, Message: "success", Data: &fiber.Map{"data": result}})
+	return c.Status(httpp.StatusCreated).JSON(responses.UserResponse{Status: httpp.StatusCreated, Message: "success", Data: &fiber.Map{"data": insertedDoc}})
 }
 
 func CreateAccount() (string, string) {
@@ -144,10 +156,10 @@ func CreateAccount() (string, string) {
 	fmt.Println("ID", createAccountTx.ID())
 
 	// get latest block height
-	latestBlock, err := flowClient.GetLatestBlock(ctx, true)
+	// latestBlock, err := flowClient.GetLatestBlock(ctx, true)
 
-	//print the latest block height
-	fmt.Println("Latest block height:", latestBlock.Height)
+	// //print the latest block height
+	// fmt.Println("Latest block height:", latestBlock.Height)
 
 	time.Sleep(7 * time.Second)
 

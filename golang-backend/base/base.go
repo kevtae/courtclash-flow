@@ -25,7 +25,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
-	"time"
 
 	"github.com/onflow/flow-go-sdk"
 	"github.com/onflow/flow-go-sdk/access"
@@ -276,7 +275,7 @@ func WaitForSeal(ctx context.Context, c access.Client, id flow.Identifier) *flow
 
 	for result.Status != flow.TransactionStatusSealed {
 		// sleep for 5 seconds
-		time.Sleep(5 * time.Second)
+		// time.Sleep(5 * time.Second)
 
 		result, err = c.GetTransactionResult(ctx, id)
 		Handle(err)
