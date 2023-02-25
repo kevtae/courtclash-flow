@@ -12,4 +12,8 @@ func ChallengeRoute(app *fiber.App) {
 	app.Post("/verify-submission", controllers.VerfiySubmission)
 	app.Get("/get-total-stake", controllers.GetBalance)
 	app.Get("/end-challenge", controllers.EndChallenge)
+	app.Post("/create-submission", controllers.CreateSubmission)
+	app.Get("/get-submission", controllers.GetAllSubmission)
+	app.Get("/get-submission-notverify", controllers.GetSubmissionNotVerify)
+
 }

@@ -161,7 +161,7 @@ func CreateAccount() (string, string) {
 	// //print the latest block height
 	// fmt.Println("Latest block height:", latestBlock.Height)
 
-	time.Sleep(7 * time.Second)
+	time.Sleep(10 * time.Second)
 
 	accountCreationTxRes := base.WaitForSeal(ctx, flowClient, createAccountTx.ID())
 
