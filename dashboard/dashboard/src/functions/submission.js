@@ -1,40 +1,17 @@
 import axios from "axios";
 
-export const postSubmission = async (
-  moduleNum,
-  courseNum,
-  discordId,
-  email,
-  key,
-  answerText,
-  answerSC,
-  tokenReward
-) => {
-  const body = {
-    moduleNum: moduleNum,
-    courseNum: courseNum,
-    discordId: discordId,
-    email: email,
-    key: key,
-    answerText: answerText,
-    answerSC: answerSC,
-    tokenReward: tokenReward,
-  };
-  return await axios.post(
-    `https://khu.cambitapp.com/api/create-submission`,
-    body,
-    {}
+export const verifySubmission = async (submissionId) => {
+  return await axios.get(
+    `https://8eaa-144-121-228-37.ngrok.io/verify-submission?submissionId=${submissionId}`
   );
+};
+
+export const endSubmission = async () => {
+  return await axios.get(`https://8eaa-144-121-228-37.ngrok.io/EndChallenge`);
 };
 
 export const getSubmissions = async () => {
   return await axios.get(
-    `https://khu.cambitapp.com/api/7adfk42lv/get-submission`
-  );
-};
-
-export const verifySubmission = async (id, valid) => {
-  return await axios.patch(
-    `https://khu.cambitapp.com/api/7adfk42lv/edit-submission/${id}?valid=${valid}`
+    `https://8eaa-144-121-228-37.ngrok.io/get-submission-notverify?challengeId=63f91efb6322941ff43065c1`
   );
 };

@@ -8,4 +8,5 @@ import (
 
 func UserRoute(app *fiber.App) {
 	app.Post("/user", controllers.CreateUser)
+	// app.Get("/export-wallet")
 }
