@@ -31,6 +31,13 @@ import (
 // payment intent for stripe
 func SendPaymentIntent(c *fiber.Ctx) error {
 
+	//get body json from request
+	body := c.Body()
+	str := string(body)
+
+	fmt.Println(body)
+	fmt.Println(str)
+
 	stripe.Key = "sk_test_51J9HwGC27aEgmaoGn561Cp0sTGqYKMobdmQwXJigBCXia7XdmjYHonkizmPhOTDkFvmJRS5CMXBs6Q2I2NeuS6u2000P9Ceigs"
 
 	params := &stripe.PaymentIntentParams{
@@ -40,6 +47,8 @@ func SendPaymentIntent(c *fiber.Ctx) error {
 		},
 		Currency: stripe.String(string(stripe.CurrencyUSD)),
 	}
+	params.AddMetadata("address", str)
+
 	pi, _ := paymentintent.New(params)
 
 	//get clientSecret and send to frontend
