@@ -1,0 +1,41 @@
+{
+  "name": "krause-house-courses",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "build:local": "cross-env NODE_OPTIONS=--max-old-space-size=4096 next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.86.0",
+    "@emotion/react": "^11.9.0",
+    "@emotion/styled": "^11.8.1",
+    "@mui/icons-material": "^5.6.2",
+    "@mui/material": "^5.6.4",
+    "axios": "^0.27.2",
+    "base64-arraybuffer": "^1.0.2",
+    "cross-env": "^7.0.3",
+    "firebase": "^9.8.0",
+    "formik": "^2.2.9",
+    "fs": "^0.0.1-security",
+    "jarallax": "^2.0.3",
+    "next": "11.1.3",
+    "react": "17.0.2",
+    "react-aws-s3": "^1.5.0",
+    "react-countup": "^6.2.0",
+    "react-dom": "17.0.2",
+    "react-images-uploading": "^3.1.6",
+    "react-router-dom": "^6.3.0",
+    "react-visibility-sensor": "^5.1.1",
+    "uuid": "^8.3.2",
+    "yup": "^0.32.11"
+  },
+  "devDependencies": {
+    "dotenv": "^16.0.0",
+    "eslint": "8.14.0",
+    "eslint-config-next": "12.1.6"
+  }
+}
