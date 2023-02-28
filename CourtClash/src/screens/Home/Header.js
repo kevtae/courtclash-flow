@@ -2,33 +2,41 @@
 import React from 'react';
 
 // UI
-import {StyleSheet, View} from 'react-native';
+import {StyleSheet, View, TouchableWithoutFeedback} from 'react-native';
 import {Avatar, Text} from 'react-native-paper';
 
-const Header = ({navigation}) => {
+const Header = ({navigation, user}) => {
   return (
-    <View
-      style={{
-        alignSelf: 'flex-end',
-        flexDirection: 'row',
-        alignItems: 'center',
-      }}>
-      <Avatar.Image
-        size={30}
+    <TouchableWithoutFeedback onPress={() => navigation.navigate('Profile')}>
+      <View
         style={{
-          borderColor: '#F24607',
-          borderWidth: 1,
-          marginRight: 10,
-        }}
-        source={{
-          uri: 'https://sm.ign.com/ign_nordic/cover/a/avatar-gen/avatar-generations_prsz.jpg ',
-        }}
-      />
-      <View>
-        <Text style={{color: 'white'}}>Hooper #45</Text>
-        <Text style={{color: 'white'}}>0xea...2c6c</Text>
+          alignSelf: 'flex-end',
+          flexDirection: 'row',
+          alignItems: 'center',
+        }}>
+        <View style={{alignItems: 'flex-end'}}>
+          <Text style={{color: 'white'}}>{user.email}</Text>
+          <Text style={{color: 'white'}}>0x{user.address}</Text>
+        </View>
+        <View
+          style={{
+            marginLeft: 10,
+            padding: 2,
+            backgroundColor: 'white',
+            borderRadius: 25,
+          }}>
+          <Avatar.Image
+            size={40}
+            style={{
+              borderColor: 'white',
+            }}
+            source={{
+              uri: 'https://cdn.discordapp.com/attachments/981697635591290970/1078871993866264576/DL_I_want_to_a_generic_profile_icon_that_is_a_basketball_hooper_47f43156-2582-4933-8661-476deca518c9.png',
+            }}
+          />
+        </View>
       </View>
-    </View>
+    </TouchableWithoutFeedback>
   );
 };
 

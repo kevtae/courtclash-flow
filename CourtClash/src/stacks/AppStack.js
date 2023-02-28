@@ -8,10 +8,12 @@ import {createNativeStackNavigator} from '@react-navigation/native-stack';
 // Auth
 import Home from '@screens/Home';
 import Record from '@screens/Record';
+import ClashSubmitted from '@screens/ClashSubmitted';
+import Profile from '@screens/Profile';
 
 const Stack = createNativeStackNavigator();
 
-const AuthStack = () => {
+const AppStack = () => {
   return (
     <Stack.Navigator initialRouteName="Home">
       <Stack.Screen
@@ -24,8 +26,18 @@ const AuthStack = () => {
         name="Record"
         component={Record}
       />
+      <Stack.Screen
+        options={{headerShown: false}}
+        name="Profile"
+        component={Profile}
+      />
+      <Stack.Screen
+        options={{headerShown: false}}
+        name="ClashSubmitted"
+        component={ClashSubmitted}
+      />
     </Stack.Navigator>
   );
 };
 
-export default AuthStack;
+export default AppStack;

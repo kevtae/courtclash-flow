@@ -8,8 +8,13 @@ import {Text} from 'react-native-paper';
 const Description = ({navigation, topshotItem}) => {
   const [seeMore, setSeeMore] = useState(false);
 
+  const dateString = topshotItem.date;
+  const date = new Date(dateString);
+  const options = {month: 'short', day: 'numeric', year: 'numeric'};
+  const formattedDate = date.toLocaleDateString('en-US', options);
+
   return (
-    <View style={{flex: 3}}>
+    <View style={{flex: 3, marginRight: 5}}>
       {/* DESCRIPTION */}
       <View style={{flexDirection: 'row', alignItems: 'center'}}>
         <Image
@@ -21,34 +26,38 @@ const Description = ({navigation, topshotItem}) => {
             borderRadius: 5,
             marginRight: 10,
           }}
-          source={{
-            uri: 'https://sm.ign.com/ign_nordic/cover/a/avatar-gen/avatar-generations_prsz.jpg ',
-          }}
+          source={{uri: topshotItem.Image[0]}}
         />
         <View>
           <Text
             variant="titleMedium"
-            style={{color: 'white', fontWeight: 'bold'}}>
-            @Evan Mobley
+            style={{
+              color: 'white',
+              fontWeight: 'bold',
+              width: 200,
+            }}>
+            {topshotItem.name}
           </Text>
           <Text
             variant="titleSmall"
             style={{color: '#dedede', fontWeight: 'bold'}}>
-            Dec 8, 2022
+            {formattedDate}
           </Text>
         </View>
       </View>
       <TouchableWithoutFeedback onPress={() => setSeeMore(prev => !prev)}>
         <View>
-          <Text variant="bodyMedium" style={{color: '#dedede', marginTop: 6}}>
+          <Text
+            variant="bodyMedium"
+            style={{color: 'white', marginTop: 6, fontWeight: '600'}}>
             {seeMore
-              ? topshotItem.user.description
-              : topshotItem.user.description.substring(0, 100)}
+              ? topshotItem.description
+              : `${topshotItem.description.substring(0, 100)}...`}
           </Text>
           <Text
             variant="bodyMedium"
             style={{
-              color: '#dedede',
+              color: 'white',
               marginTop: 8,
             }}>
             {seeMore ? 'See Less' : 'See More'}

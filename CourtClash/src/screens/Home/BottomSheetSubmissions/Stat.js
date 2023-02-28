@@ -12,7 +12,7 @@ const Stat = ({title, value}) => {
         {title}
       </Text>
       <Text style={{color: '#ffae00', fontWeight: 'bold', fontSize: 30}}>
-        {value}
+        {value.toFixed(2)}
       </Text>
     </Surface>
   );
