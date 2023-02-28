@@ -2,10 +2,20 @@
 import React from 'react';
 
 // UI
-import {StyleSheet, View} from 'react-native';
+import {StyleSheet, View, Linking} from 'react-native';
 import {Chip} from 'react-native-paper';
 
-const InfoChips = ({navigation}) => {
+const InfoChips = ({topshotItem}) => {
+  const dateString = topshotItem.date;
+  const date = new Date(dateString);
+  const options = {month: 'short', day: 'numeric', year: 'numeric'};
+  const formattedDate = date.toLocaleDateString('en-US', options);
+
+  function openUrl(url) {
+    Linking.openURL(url).catch(error =>
+      console.error('An error occurred:', error),
+    );
+  }
   return (
     <View
       style={{
@@ -22,24 +32,29 @@ const InfoChips = ({navigation}) => {
           justifyContent: 'space-between',
           marginTop: 20,
         }}>
-        <Chip
-          style={{backgroundColor: '#A6121F'}}
-          textStyle={{color: 'white'}}
-          onPress={() => console.log('Pressed')}>
-          Dec 8, 2022
-        </Chip>
+        {topshotItem.challengeType !== 'Dribble' && (
+          <Chip
+            style={{backgroundColor: '#A6121F'}}
+            textStyle={{color: 'white'}}
+            onPress={() => console.log('Pressed')}>
+            {formattedDate}
+          </Chip>
+        )}
+
         <Chip
           style={{backgroundColor: '#F24607'}}
           textStyle={{color: 'white'}}
           onPress={() => console.log('Pressed')}>
-          Block
+          {topshotItem.challengeType}
         </Chip>
-        <Chip
-          style={{backgroundColor: '#E1862F'}}
-          textStyle={{color: 'white'}}
-          onPress={() => console.log('Pressed')}>
-          NBA Top Shot
-        </Chip>
+        {topshotItem.challengeType !== 'Dribble' && (
+          <Chip
+            style={{backgroundColor: '#E1862F'}}
+            textStyle={{color: 'white'}}
+            onPress={() => openUrl(topshotItem.link)}>
+            Top Shot
+          </Chip>
+        )}
       </View>
     </View>
   );

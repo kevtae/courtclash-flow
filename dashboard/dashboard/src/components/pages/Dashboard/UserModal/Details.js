@@ -2,96 +2,80 @@ import React, { useState } from "react";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
-import Stack from "@mui/material/Stack";
+import CircularProgress from "@mui/material/CircularProgress";
 
-import { verifySubmission } from "@functions/submission";
+import { verifySubmission, endChallenge } from "@functions/submission";
 
 const Details = ({ submissionData }) => {
   const [verified, setVerified] = useState(false);
-  const [rejected, setRejected] = useState(false);
+  const [verifyLoading, setVerifyLoading] = useState(false);
+  const [endChallengeLoading, setEndChallengeLoading] = useState(false);
+  const [challengeEnded, setChallengeEnded] = useState(false);
 
-  const onVerify = (id, valid) => {
-    verifySubmission(id, valid).then((res) => {
-      valid ? setVerified(true) : setRejected(true);
+  const onVerify = (id) => {
+    setVerifyLoading(true);
+    verifySubmission(id).then((res) => {
+      console.log("verified res----", res.data);
+      setVerified(true);
+      setVerifyLoading(false);
     });
+  };
+
+  const onEndChallenge = () => {
+    setEndChallengeLoading(true);
+    endChallenge()
+      .then((res) => {
+        console.log("Challenge Ended Success: ", res.data);
+        setChallengeEnded(true);
+        setEndChallengeLoading(false);
+      })
+      .catch((e) => {
+        console.log("Challenge Ended Error: ", e);
+        setEndChallengeLoading(false);
+      });
   };
 
   return (
     <Box>
-      <Typography variant={"h5"} fontWeight={700} gutterBottom>
-        Module Number: {submissionData.moduleNum}
-      </Typography>
-      <Typography variant={"h6"} color={"text.secondary"}>
-        Course Number: {submissionData.courseNum}
-      </Typography>
-      <Box
-        marginTop={2}
-        display={"flex"}
-        alignItems={"center"}
-        justifyContent={"space-between"}
-      >
-        <Typography variant={"h6"} fontWeight={700}>
-          Reward: ${submissionData.tokenReward} KRAUSE
-        </Typography>
-      </Box>
-      <Box marginTop={2}>
-        <Typography fontWeight="bold">Discord:</Typography>
-        <Typography>{submissionData.discordId}</Typography>
-      </Box>
-      <Box marginTop={2}>
-        <Typography fontWeight="bold">Email:</Typography>
-        <Typography>{submissionData.email}</Typography>
-      </Box>
-      <Box marginTop={2}>
-        <Typography fontWeight="bold">Public Key:</Typography>
-        <Typography>
-          {submissionData.key} saldn alsn dasln dalsn dlan dlasndoawnonsaon w
-          naod naod naobd as oads
-        </Typography>
-      </Box>
-      {verified ? (
-        <Button
-          onClick={() => onVerify(submissionData._id, true)}
-          variant={"contained"}
-          color={"primary"}
-          size={"large"}
-          disabled
-          fullWidth
-        >
-          Verified Already
-        </Button>
-      ) : rejected ? (
-        <Button
-          onClick={() => onVerify(submissionData._id, true)}
-          variant={"contained"}
-          color={"primary"}
-          size={"large"}
-          disabled
-          fullWidth
-        >
-          Rejected Already
-        </Button>
+      {Object.entries(submissionData).map((data, i) => {
+        return (
+          <Typography
+            style={{ marginBottom: 30 }}
+            variant={"body2"}
+            fontWeight={700}
+            gutterBottom
+          >
+            {data[0]}:{data[1]}
+          </Typography>
+        );
+      })}
+      {verifyLoading ? (
+        <CircularProgress />
       ) : (
-        <>
-          <Button
-            onClick={() => onVerify(submissionData._id, true)}
-            variant={"contained"}
-            color={"primary"}
-            size={"large"}
-            fullWidth
-          >
-            Verify
-          </Button>
-          <Button
-            onClick={() => onVerify(submissionData._id, false)}
-            variant={"contained"}
-            color={"error"}
-            size={"large"}
-            fullWidth
-          >
-            Reject
-          </Button>
-        </>
+        <Button
+          onClick={() => onVerify(submissionData.ID)}
+          variant={"contained"}
+          color={"primary"}
+          size={"large"}
+          fullWidth
+        >
+          {verified ? "Verified Already" : "Verify"}
+        </Button>
+      )}
+
+      {endChallengeLoading ? (
+        <CircularProgress color="error" />
+      ) : (
+        <Button
+          onClick={() => onEndChallenge()}
+          variant={"contained"}
+          color={"error"}
+          size={"large"}
+          fullWidth
+          style={{ marginTop: 20 }}
+        >
+          {challengeEnded ? "Challenge Ended" : "End Challenge"}
+        </Button>
       )}
     </Box>
   );

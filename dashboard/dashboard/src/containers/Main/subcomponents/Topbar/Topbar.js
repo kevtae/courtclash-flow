@@ -30,7 +30,7 @@ const Topbar = ({ onSidebarOpen, pages, colorInvert = false }) => {
         <Box
           component={"img"}
           src={
-            "https://krausehousework.notion.site/image/https%3A%2F%2Fs3-us-west-2.amazonaws.com%2Fsecure.notion-static.com%2F5d6df956-6d95-474d-8fed-981d5fda16df%2FKrause_House_Logo_Linear_Shadow.png?table=block&id=7d1a21e3-6e15-4ffe-9806-4b27faf49732&spaceId=9116b053-c794-4602-ac43-cffa72f470cf&width=2000&userId=&cache=v2"
+            "https://cdn.discordapp.com/attachments/961018550699556914/1080042984361431080/logo-words.png"
           }
           height={1}
           width={1}

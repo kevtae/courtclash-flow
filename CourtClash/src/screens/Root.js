@@ -2,17 +2,53 @@
 import React, {useEffect, useState} from 'react';
 
 // UI
-import {StyleSheet, View, ImageBackground, Image} from 'react-native';
-import {Surface, Button, Text} from 'react-native-paper';
+import {StyleSheet, View, Image} from 'react-native';
+import {
+  Surface,
+  Button,
+  TextInput,
+  ActivityIndicator,
+} from 'react-native-paper';
 import LinearGradient from 'react-native-linear-gradient';
+import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
 
 // CONTEXT
 import {UserContext} from '@contexts';
 
+// FUNCTIONS
+import {createOrGetUser} from '@functions/api/user';
+
 const Root = ({navigation}) => {
-  // const {user, loginWithMagicLink, logout} = React.useContext(UserContext);
+  const {user, loginWithMagicLink, logout, getUser} =
+    React.useContext(UserContext);
   const RootImage = require('@assets/images/root-image.png');
   const logo = require('@assets/images/logo-words.png');
+  const [email, setEmail] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (user) {
+      setLoading(true);
+      createOrGetUser(user.email)
+        .then(res => {
+          console.log('called createOrGetUser', user);
+          setLoading(false);
+          getUser(res.data.data.data);
+          navigation.replace('App');
+        })
+        .catch(e => {
+          console.log('Create Or Get User Failed: ', e);
+          setLoading(false);
+        });
+    } else {
+      console.log('No User: Not Logged On');
+      setLoading(false);
+    }
+  }, [user]);
+
+  const login = () => {
+    loginWithMagicLink(email);
+  };
 
   return (
     <View style={{flex: 1}}>
@@ -20,41 +56,83 @@ const Root = ({navigation}) => {
         colors={['#F24607', '#0D0D0D', '#0D0D0D', '#0D0D0D', '#A6121F']}
         start={{x: 0, y: 0}}
         end={{x: 1, y: 1}}
-        style={{flex: 1, justifyContent: 'flex-end'}}>
-        <ImageBackground source={RootImage} style={styles.imageBackground} />
+        style={{
+          height: '100%',
+          justifyContent: 'space-between',
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          width: '100%',
+          zIndex: 1,
+        }}>
+        <KeyboardAwareScrollView>
+          <Image style={styles.logo} source={logo} />
+          <Image source={RootImage} style={styles.imageBackground} />
+
+          <Surface elevation={5} style={styles.surface}>
+            {loading ? (
+              <ActivityIndicator animating={true} color={'#f7c77e'} />
+            ) : (
+              <>
+                <TextInput
+                  label="Email"
+                  value={email}
+                  type="outlined"
+                  onChangeText={text => setEmail(text)}
+                  dense
+                  style={{
+                    marginBottom: 15,
+                    backgroundColor: 'black',
+                    borderColor: '#f7c77e',
+                    borderWidth: 1,
+                    borderRadius: 5,
+                  }}
+                  contentStyle={{color: '#f7c77e'}}
+                  theme={{colors: {primary: '#f7c77e'}}}
+                  activeOutlineColor="#f7c77e"
+                  outlineColor="#f7c77e"
+                  textColor="#f7c77e"
+                  selectionColor="#f7c77e"
+                />
+
+                <Button
+                  mode="contained"
+                  style={{backgroundColor: '#f7c77e'}}
+                  labelStyle={{fontWeight: 'bold', fontSize: 18}}
+                  onPress={() => login()}>
+                  Login / Register
+                </Button>
+              </>
+            )}
+          </Surface>
+        </KeyboardAwareScrollView>
       </LinearGradient>
-      <Image style={styles.logo} source={logo} />
-      <Surface elevation={5} style={styles.surface}>
-        <Button mode="contained" onPress={() => navigation.navigate('App')}>
-          Press me
-        </Button>
-      </Surface>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
   imageBackground: {
-    width: '125%',
-    right: '26%',
+    width: '180%',
+    height: '45%',
     aspectRatio: 1,
-    marginBottom: '33%',
+    zIndex: 2,
+    right: 40,
+    bottom: 10,
   },
   logo: {
-    position: 'absolute',
     alignSelf: 'center',
     top: '5%',
     width: 200,
     height: 200,
   },
   surface: {
-    padding: 10,
+    padding: 20,
     backgroundColor: 'black',
     borderRadius: 15,
-    position: 'absolute',
-    bottom: 0,
-    bottom: '5%',
+    bottom: 20,
     alignSelf: 'center',
+    width: 280,
   },
 });
 

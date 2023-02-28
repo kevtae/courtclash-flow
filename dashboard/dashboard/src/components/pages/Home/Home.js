@@ -112,7 +112,7 @@ const Home = () => {
         <Box
           className={"jarallax-img"}
           sx={{
-            backgroundImage: `linear-gradient(rgba(0,0,0,.7), rgba(0,0,0,.7)), url("https://krausehousework.notion.site/image/https%3A%2F%2Fs3-us-west-2.amazonaws.com%2Fsecure.notion-static.com%2Ffb60b4c6-a8fe-401d-aab5-6fea422d915c%2FUntitled.png?table=block&id=70ee1753-e972-4d1d-8060-9fe32ef622db&spaceId=9116b053-c794-4602-ac43-cffa72f470cf&width=2000&userId=&cache=v2")`,
+            backgroundImage: `linear-gradient(rgba(0,0,0,.7), rgba(0,0,0,.7)), url("https://cdn.discordapp.com/attachments/997270112400838766/1080051481861967933/DL_A_wallpaper_or_background_picture_of_a_basketball_court_wher_2dec05c3-c322-4e32-9636-dd01a2e381cb.png")`,
           }}
         />
         <Container>

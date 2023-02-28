@@ -1,6 +1,5 @@
 // SETUP
 import React from 'react';
-import {StyleSheet} from 'react-native';
 
 // UI
 import {
@@ -13,6 +12,10 @@ import {SafeAreaProvider} from 'react-native-safe-area-context';
 import {NavigationContainer} from '@react-navigation/native';
 import MainStack from '@stacks/MainStack';
 
+// PAYMENTS
+import {StripeProvider} from '@stripe/stripe-react-native';
+import {STRIPE_PUBLISHABLE_KEY, STRIPE_MERCHANT_ID} from '@env';
+
 // CONTEXT
 import {UserProvider} from '@contexts';
 
@@ -20,35 +23,20 @@ const App = () => {
   return (
     <PaperProvider>
       <PaperPortal>
-        <SafeAreaProvider>
-          <UserProvider>
-            <NavigationContainer>
-              <MainStack />
-            </NavigationContainer>
-          </UserProvider>
-        </SafeAreaProvider>
+        <StripeProvider
+          publishableKey={STRIPE_PUBLISHABLE_KEY}
+          merchantIdentifier={STRIPE_MERCHANT_ID}>
+          <SafeAreaProvider>
+            <UserProvider>
+              <NavigationContainer>
+                <MainStack />
+              </NavigationContainer>
+            </UserProvider>
+          </SafeAreaProvider>
+        </StripeProvider>
       </PaperPortal>
     </PaperProvider>
   );
 };
-
-const styles = StyleSheet.create({
-  sectionContainer: {
-    marginTop: 32,
-    paddingHorizontal: 24,
-  },
-  sectionTitle: {
-    fontSize: 24,
-    fontWeight: '600',
-  },
-  sectionDescription: {
-    marginTop: 8,
-    fontSize: 18,
-    fontWeight: '400',
-  },
-  highlight: {
-    fontWeight: '700',
-  },
-});
 
 export default App;
