@@ -8,7 +8,7 @@ import Divider from "@mui/material/Divider";
 import Image from "./Image";
 import Details from "./Details";
 
-const UserModal = ({ open, setOpen, currentUser }) => {
+const UserModal = ({ open, setOpen, currentChallenge }) => {
   return (
     <Dialog onClose={() => setOpen(false)} open={open} maxWidth={"lg"}>
       <Box paddingY={{ xs: 1, sm: 2 }} paddingX={{ xs: 2, sm: 4 }}>
@@ -36,8 +36,8 @@ const UserModal = ({ open, setOpen, currentUser }) => {
             />
           </Box>
         </Box>
-        {currentUser &&
-          currentUser[1].map((sub) => {
+        {currentChallenge &&
+          currentChallenge[1].map((sub) => {
             return (
               <Box key={sub[0]} paddingY={2}>
                 <Grid container spacing={{ xs: 2, md: 4 }}>

@@ -18,7 +18,24 @@ const Image = ({ submissionData }) => {
           },
         }}
       >
-        <img src={submissionData.answerSC} alt={submissionData.answerText} />
+        <>
+          <video width={450} controls>
+            <source
+              className="w-full"
+              src={submissionData.videoLink}
+              type="video/mp4"
+            />
+          </video>
+          <br />
+          <a
+            className="text-blue-600 underline font-bold mt-2"
+            target="_blank"
+            rel="noreferrer"
+            href={submissionData.videoLink}
+          >
+            Click Here If Video Not Showing
+          </a>
+        </>
       </Box>
     </Box>
   );
