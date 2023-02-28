@@ -119,7 +119,7 @@ func EndChallenge(c *fiber.Ctx) error {
 		SetScript([]byte(`
 		import FungibleToken from 0x9a0766d93b6608b7
 		import FiatToken from 0xa983fecbed621163
-		import StakingV7 from 0xf3ecf4159841b043
+		import StakingV8 from 0xf3ecf4159841b043
 		
 		
 		//distribute the stake once the challenge ends
@@ -128,7 +128,7 @@ func EndChallenge(c *fiber.Ctx) error {
 		
 		
 			prepare(admin: AuthAccount) {
-				let adminRef = admin.borrow<&StakingV7.Administrator>(from: /storage/StakingAdministrator)!
+				let adminRef = admin.borrow<&StakingV8.Administrator>(from: /storage/StakingAdministratorV8)!
 		
 		
 				adminRef.distributeStake()

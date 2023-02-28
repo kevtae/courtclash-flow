@@ -2,10 +2,7 @@ package controllers
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
-	"io/ioutil"
-	"strings"
 	"sync"
 
 	"golang-backend/base"
@@ -35,7 +32,6 @@ import (
 
 	"github.com/magiclabs/magic-admin-go"
 	magicClient "github.com/magiclabs/magic-admin-go/client"
-	"github.com/magiclabs/magic-admin-go/token"
 
 	HTTP "github.com/onflow/flow-go-sdk/access/http"
 )
@@ -177,6 +173,21 @@ func CreateAccount() (string, string) {
 		}
 	}
 
+	// var address string = myAddress.Hex()
+
+	// setupVault(address)
+
+	// var address string = myAddress.Hex()
+
+	// //send flow and create vault
+	// afterTx := func(address string) {
+	// 	transferFlow(address)
+
+	// 	setupVault(address)
+	// }
+
+	// defer afterTx(address)
+
 	return myAddress.Hex(), myPrivateKey.String()
 
 	// fmt.Println("Account created with address:", myAddress.Hex())
@@ -224,7 +235,9 @@ func GetUserBalance(c *fiber.Ctx) error {
 	//execute the script
 
 	balanceRes, err := flowClient.ExecuteScriptAtLatestBlock(ctx, script, args)
-	base.Handle(err)
+	if err != nil {
+		return c.Status(httpp.StatusInternalServerError).JSON(responses.UserResponse{Status: httpp.StatusInternalServerError, Message: "error", Data: &fiber.Map{"data": err.Error()}})
+	}
 
 	fmt.Println("Transaction status:", balanceRes)
 
@@ -232,87 +245,180 @@ func GetUserBalance(c *fiber.Ctx) error {
 
 }
 
-/*
-Ensures the Decentralised ID Token (DIDT) sent by the client is valid
-Saves the author's user info in context values ✨
-*/
-func checkBearerToken(next httpHandlerFunc) httpHandlerFunc {
-	return func(res httpp.ResponseWriter, req *httpp.Request) {
+// func transferFlow(address string) {
+// 	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+// 	defer cancel()
 
-		// Check whether or not DIDT exists in HTTP Header Request
-		if !strings.HasPrefix(req.Header.Get("Authorization"), authBearer) {
-			fmt.Fprintf(res, "Bearer token is required")
-			return
-		}
+// 	// amount := 20.00000000
 
-		// Retrieve DIDT token from HTTP Header Request
-		didToken := req.Header.Get("Authorization")[len(authBearer)+1:]
+// 	//initialize fiatToken vault to the account
+// 	//create a transaction to send to flow
+// 	flowClient, err := HTTP.NewClient(HTTP.TestnetHost)
+// 	base.Handle(err)
 
-		// Create a Token instance to interact with the DID token
-		tk, err := token.NewToken(didToken)
-		if err != nil {
-			fmt.Fprintf(res, "Malformed DID token error: %s", err.Error())
-			res.Write([]byte(err.Error()))
-			return
-		}
+// 	serviceAcctAddr, serviceAcctKey, serviceSigner := base.ServiceAccount(flowClient)
 
-		// Validate the Token instance before using it
-		if err := tk.Validate(); err != nil {
-			fmt.Fprintf(res, "DID token failed validation: %s", err.Error())
-			return
-		}
+// 	//create new vault for fiat token
+// 	transaction := flow.NewTransaction().
+// 		SetScript([]byte(`
+// 		import FungibleToken from 0x9a0766d93b6608b7
 
-		// Get the the user's information
-		userInfo, err := magicSDK.User.GetMetadataByIssuer(tk.GetIssuer())
-		if err != nil {
-			fmt.Fprintf(res, "Error when calling GetMetadataByIssuer: %s", err.Error())
-			return
-		}
+// 		transaction(to: Address) {
+// 			let vault: @FungibleToken.Vault
+// 			prepare(signer: AuthAccount) {
+// 			self.vault <- signer
+// 			.borrow<&{FungibleToken.Provider}>(from: /storage/flowTokenVault)!
+// 			.withdraw(amount: 20.00000000)
+// 			}
+// 			execute {
+// 			getAccount(to)
+// 			.getCapability(/public/flowTokenReceiver)!
+// 			.borrow<&{FungibleToken.Receiver}>()!
+// 			.deposit(from: <-self.vault)
+// 			}
+// 		}
 
-		// Use context values to store user's info
-		ctx := context.WithValue(req.Context(), userInfoKey, userInfo)
-		req = req.WithContext(ctx)
-		next(res, req)
-	}
-}
+// 	`))
 
-// Save authenticated user info once they login from the client side ✨
-func saveUserInfo(w httpp.ResponseWriter, r *httpp.Request) {
-	fmt.Println("Endpoint Hit: save-user-info")
+// 	referenceBlockID := base.GetReferenceBlockId(flowClient)
 
-	// Get the authenticated author's info from context values
-	userInfo := r.Context().Value(userInfoKey)
-	userInfoMap := userInfo.(*magic.UserInfo)
+// 	transaction.SetProposalKey(
+// 		serviceAcctAddr,
+// 		serviceAcctKey.Index,
+// 		serviceAcctKey.SequenceNumber,
+// 	)
+// 	transaction.SetReferenceBlockID(referenceBlockID)
+// 	transaction.SetPayer(serviceAcctAddr)
+// 	transaction.AddAuthorizer(serviceAcctAddr)
+// 	//add argument to transaction that convert amount to cadence
+// 	// transaction.AddArgument(cadence.UFix64(amount))
+// 	transaction.AddArgument(cadence.NewAddress(flow.HexToAddress(address)))
 
-	// Get body of our POST request
-	reqBody, _ := ioutil.ReadAll(r.Body)
-	var user models.User
+// 	//add argument to transaction that convert amount to cadence
 
-	// Unmarshal JSON data into a new User struct
-	json.Unmarshal(reqBody, &user)
+// 	// Sign the transaction with the service account, which already exists
+// 	// All new accounts must be created by an existing account
+// 	err = transaction.SignEnvelope(serviceAcctAddr, serviceAcctKey.Index, serviceSigner)
+// 	base.Handle(err)
 
-	/*
-		Marshal User struct into JSON data to
-		access key-value pair.
-	*/
-	json.Marshal(user)
+// 	// Send the transaction to the network
+// 	err = flowClient.SendTransaction(ctx, *transaction)
+// 	base.Handle(err)
 
-	/*
-		If the email sent by the client does not match
-		the email saved via Magic SDK, then it is an
-		unauthorized login.
-	*/
-	if userInfoMap.Email != user.Email {
-		fmt.Fprintf(w, "Unauthorized user login")
-		return
-	}
+// 	fmt.Println("ID", transaction.ID())
 
-	/*
-		If you wanted, you could call your application logic to save the user's info.
-		E.g.
-		logic.User.add(userInfoMap.Email, userInfoMap.Issuer, userInfo.PublicAddress)
-	*/
+// 	// get latest block height
+// 	latestBlock, err := flowClient.GetLatestBlock(ctx, true)
 
-	// Instead of saving the user's info, we'll just return it
-	w.Write([]byte("Yay! User was able to login / sign up. 🪄 Email: " + user.Email))
-}
+// 	//print the latest block height
+// 	fmt.Println("Latest block height:", latestBlock.Height)
+
+// 	time.Sleep(7 * time.Second)
+
+// 	transactionRes := base.WaitForSeal(ctx, flowClient, transaction.ID())
+// 	base.Handle(err)
+
+// 	fmt.Println("Transaction status:", transactionRes.Status)
+// }
+
+// // run flow transaction script to set up fiattoken vault
+// func setupVault(address string) {
+// 	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+// 	defer cancel()
+
+// 	//initialize fiatToken vault to the account
+// 	//create a transaction to send to flow
+// 	flowClient, err := HTTP.NewClient(HTTP.TestnetHost)
+// 	base.Handle(err)
+
+// 	userCollection := configs.GetCollection(configs.DB, "users")
+// 	userFilter := bson.M{"address": address}
+// 	userCursor, err := userCollection.Find(ctx, userFilter)
+// 	// if err != nil {
+// 	// 	return c.Status(http.StatusInternalServerError).JSON(responses.UserResponse{Status: http.StatusInternalServerError, Message: "error", Data: &fiber.Map{"data": err.Error()}})
+// 	// }
+
+// 	var user models.User
+// 	for userCursor.Next(ctx) {
+// 		err := userCursor.Decode(&user)
+// 		if err != nil {
+// 			// return c.Status(http.StatusInternalServerError).JSON(responses.UserResponse{Status: http.StatusInternalServerError, Message: "error", Data: &fiber.Map{"data": err.Error()}})
+// 		}
+// 	}
+
+// 	// serviceAcctAddr, serviceAcctKey, serviceSigner := ServiceAccount(flowClient, "983e58ec210fe715c3c90d18ddae1323de6cbd8e5348fca4b167ed2cf6cd1ddc", "1848726466b5f84e")
+
+// 	serviceAcctAddr, serviceAcctKey, serviceSigner := ServiceAccount(flowClient, user.PrivateKey, user.Address)
+
+// 	//create new vault for fiat token
+// 	transaction := flow.NewTransaction().
+// 		SetScript([]byte(`
+// 		import FungibleToken from 0x9a0766d93b6608b7
+// 		import FiatToken from 0xa983fecbed621163
+
+// 		//set up vault for USDC
+// 		transaction {
+
+// 		  prepare(signer: AuthAccount) {
+
+// 			// It's OK if the account already has a Vault, but we don't want to replace it
+// 			if(signer.borrow<&FiatToken.Vault>(from: FiatToken.VaultStoragePath) != nil) {
+// 			  return
+// 			}
+
+// 			// Create a new FUSD Vault and put it in storage
+// 			signer.save(<-FiatToken.createEmptyVault(), to: FiatToken.VaultStoragePath)
+
+// 			// Create a public capability to the Vault that only exposes
+// 			// the deposit function through the Receiver interface
+// 			signer.link<&FiatToken.Vault{FungibleToken.Receiver}>(
+// 			  FiatToken.VaultReceiverPubPath,
+// 			  target: FiatToken.VaultStoragePath
+// 			)
+
+// 			// Create a public capability to the Vault that only exposes
+// 			// the balance field through the Balance interface
+// 			signer.link<&FiatToken.Vault{FungibleToken.Balance}>(
+// 			  FiatToken.VaultBalancePubPath,
+// 			  target: FiatToken.VaultStoragePath
+// 			)
+// 		  }
+// 		}
+
+// 	`))
+
+// 	referenceBlockID := base.GetReferenceBlockId(flowClient)
+
+// 	transaction.SetProposalKey(
+// 		serviceAcctAddr,
+// 		serviceAcctKey.Index,
+// 		serviceAcctKey.SequenceNumber,
+// 	)
+// 	transaction.SetReferenceBlockID(referenceBlockID)
+// 	transaction.SetPayer(serviceAcctAddr)
+// 	transaction.AddAuthorizer(serviceAcctAddr)
+
+// 	// Sign the transaction with the service account, which already exists
+// 	// All new accounts must be created by an existing account
+// 	err = transaction.SignEnvelope(serviceAcctAddr, serviceAcctKey.Index, serviceSigner)
+// 	base.Handle(err)
+
+// 	// Send the transaction to the network
+// 	err = flowClient.SendTransaction(ctx, *transaction)
+
+// 	fmt.Println("ID", transaction.ID())
+
+// 	// get latest block height
+// 	latestBlock, err := flowClient.GetLatestBlock(ctx, true)
+
+// 	//print the latest block height
+// 	fmt.Println("Latest block height:", latestBlock.Height)
+
+// 	time.Sleep(10 * time.Second)
+
+// 	transactionRes := base.WaitForSeal(ctx, flowClient, transaction.ID())
+// 	base.Handle(err)
+
+// 	fmt.Println("Transaction status:", transactionRes.Status)
+
+// }

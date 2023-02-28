@@ -1,4 +1,4 @@
-import StakingV7 from 0xf3ecf4159841b043
+import StakingV8 from 0xf3ecf4159841b043
 
 
 // Get vault balance
@@ -6,7 +6,7 @@ import StakingV7 from 0xf3ecf4159841b043
 pub fun main(): UFix64  {
 
 
-    return StakingV7.getStakeBalance()
+    return StakingV8.getStakeBalance()
 
 
 }

@@ -2,7 +2,7 @@ import FungibleToken from 0x9a0766d93b6608b7
 import FiatToken from 0xa983fecbed621163
 
 
-pub contract StakingV7 {
+pub contract StakingV8{
     // Event that is emitted when tokens are deposited to the fee vault
     pub event TokensDeposited(amount: UFix64)
 
@@ -58,10 +58,10 @@ pub contract StakingV7 {
 
         pub fun qualifyStaker(_ submissionId: String){
             var i = 0
-            while i < StakingV7.stakers.length {
-                if StakingV7.stakers[i].submissionId == submissionId {
-                    StakingV7.stakers[i].setQualified(true)
-                    StakingV7.qualifiedStakersNumber = StakingV7.qualifiedStakersNumber + 1.0000000
+            while i < StakingV8.stakers.length {
+                if StakingV8.stakers[i].submissionId == submissionId {
+                    StakingV8.stakers[i].setQualified(true)
+                    StakingV8.qualifiedStakersNumber = StakingV8.qualifiedStakersNumber + 1.0000000
                 }
                 i = i + 1
             }
@@ -70,14 +70,14 @@ pub contract StakingV7 {
         //distribute stake to stakers where qualified is true
         pub fun distributeStake(){
             var i = 0
-            while i < StakingV7.stakers.length {
-                if StakingV7.stakers[i].qualified {
-                    let recipient= getAccount(StakingV7.stakers[i].address)
+            while i < StakingV8.stakers.length {
+                if StakingV8.stakers[i].qualified {
+                    let recipient= getAccount(StakingV8.stakers[i].address)
                     let receiverRef = recipient.getCapability(FiatToken.VaultReceiverPubPath)
                             .borrow<&{FungibleToken.Receiver}>()
                             ?? panic("Could not borrow receiver reference to the recipient's Vault")
 
-                    let depositVault <- StakingV7.vault.withdraw(amount: StakingV7.vault.balance/StakingV7.qualifiedStakersNumber)
+                    let depositVault <- StakingV8.vault.withdraw(amount: StakingV8.vault.balance/StakingV8.qualifiedStakersNumber)
                     receiverRef.deposit(from: <-depositVault)
                 }
                 i = i + 1
@@ -122,7 +122,7 @@ pub contract StakingV7 {
 
 
     //create admin resource
-    self.account.save<@Administrator>(<-create Administrator(), to: /storage/StakingAdministrator)
+    self.account.save<@Administrator>(<-create Administrator(), to: /storage/StakingAdministratorV8)
   }
 
 

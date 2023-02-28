@@ -1,4 +1,4 @@
-import StakingV7 from 0xf3ecf4159841b043
+import StakingV8 from 0xf3ecf4159841b043
 
 
 // This script allows you to get all the stakers in the staking contract
@@ -16,9 +16,9 @@ import StakingV7 from 0xf3ecf4159841b043
 
     }
 
-pub fun main(): [StakingV7.staker]  {
+pub fun main(): [StakingV8.staker]  {
 
 
-    return StakingV7.getStakers()
+    return StakingV8.getStakers()
 
 }
