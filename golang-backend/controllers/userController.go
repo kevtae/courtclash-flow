@@ -23,6 +23,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 
+	"github.com/onflow/cadence"
 	"github.com/onflow/flow-go-sdk/access/http"
 	"github.com/onflow/flow-go-sdk/crypto"
 
@@ -35,6 +36,8 @@ import (
 	"github.com/magiclabs/magic-admin-go"
 	magicClient "github.com/magiclabs/magic-admin-go/client"
 	"github.com/magiclabs/magic-admin-go/token"
+
+	HTTP "github.com/onflow/flow-go-sdk/access/http"
 )
 
 var userCollection *mongo.Collection = configs.GetCollection(configs.DB, "users")
@@ -177,6 +180,55 @@ func CreateAccount() (string, string) {
 	return myAddress.Hex(), myPrivateKey.String()
 
 	// fmt.Println("Account created with address:", myAddress.Hex())
+
+}
+
+func GetUserBalance(c *fiber.Ctx) error {
+	// Connect to the Flow testnet
+	ctx := context.Background()
+	flowClient, err := HTTP.NewClient(HTTP.TestnetHost)
+	base.Handle(err)
+
+	address := c.Query("address")
+
+	fmt.Println(address)
+
+	script := []byte(`
+	import FungibleToken from 0x9a0766d93b6608b7
+	import FiatToken from 0xa983fecbed621163
+
+	pub fun main(address: Address): UFix64 {
+		let account = getAccount(address)
+			.getCapability<&FiatToken.Vault{FungibleToken.Balance}>(
+			   FiatToken.VaultBalancePubPath
+			)
+			.borrow()
+			?? panic("Could not borrow Vault reference")
+
+		return account.balance
+	}
+
+	`)
+
+	addr := flow.HexToAddress(address)
+
+	//add arguments to the script
+	// args := [][]byte{
+	// 		address
+	// }
+
+	args := []cadence.Value{
+		cadence.Address(addr),
+	}
+
+	//execute the script
+
+	balanceRes, err := flowClient.ExecuteScriptAtLatestBlock(ctx, script, args)
+	base.Handle(err)
+
+	fmt.Println("Transaction status:", balanceRes)
+
+	return c.Status(httpp.StatusCreated).JSON(responses.UserResponse{Status: httpp.StatusCreated, Message: "success", Data: &fiber.Map{"data": balanceRes}})
 
 }
 

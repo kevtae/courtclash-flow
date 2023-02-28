@@ -217,7 +217,7 @@ func GetSubmissionNotVerify(c *fiber.Ctx) error {
 	challengeIDNew, err := primitive.ObjectIDFromHex(challengeID)
 
 	//find all submission that matches challengeID
-	cursor, err := submissionCollection.Find(ctx, bson.M{"challengeID": challengeIDNew, "isVerified": false})
+	cursor, err := submissionCollection.Find(ctx, bson.M{"challengeID": challengeIDNew, "isverified": false})
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).JSON(responses.UserResponse{Status: http.StatusInternalServerError, Message: "error", Data: &fiber.Map{"data": err.Error()}})
 	}
@@ -229,6 +229,42 @@ func GetSubmissionNotVerify(c *fiber.Ctx) error {
 		submissions = append(submissions, submission)
 	}
 
+	fmt.Println(submissions)
+
+	//return all the submission
+	return c.Status(http.StatusOK).JSON(responses.UserResponse{Status: http.StatusOK, Message: "success", Data: &fiber.Map{"data": submissions}})
+}
+
+// get submission through user id
+func GetSubmissionUser(c *fiber.Ctx) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	//get query of challengeID
+	userId := c.Query("userId")
+
+	fmt.Println(userId)
+
+	var submissions []models.Submission
+
+	//convert challengeId to hex
+	userIdNew, err := primitive.ObjectIDFromHex(userId)
+
+	//find all submission that matches challengeID
+	cursor, err := submissionCollection.Find(ctx, bson.M{"userID": userIdNew})
+	if err != nil {
+		return c.Status(http.StatusInternalServerError).JSON(responses.UserResponse{Status: http.StatusInternalServerError, Message: "error", Data: &fiber.Map{"data": err.Error()}})
+	}
+
+	//loop through all the submission and append to the array
+	for cursor.Next(ctx) {
+		var submission models.Submission
+		cursor.Decode(&submission)
+		submissions = append(submissions, submission)
+	}
+
+	fmt.Println(submissions)
+
 	//return all the submission
 	return c.Status(http.StatusOK).JSON(responses.UserResponse{Status: http.StatusOK, Message: "success", Data: &fiber.Map{"data": submissions}})
 }
@@ -238,11 +274,17 @@ func VerfiySubmission(c *fiber.Ctx) error {
 	ctx := context.Background()
 	id := c.Query("submissionId")
 
-	//find the submission by id and change isVerified to true
-	filter := bson.M{"_id": id}
-	update := bson.M{"$set": bson.M{"isVerified": true}}
-	_, err := submissionCollection.UpdateOne(ctx, filter, update)
+	newId, err := primitive.ObjectIDFromHex(id)
 
+	//find the submission by id and change isVerified to true
+	filter := bson.M{"_id": newId}
+	update := bson.M{"$set": bson.M{"isverified": true}}
+	result, err := submissionCollection.UpdateOne(ctx, filter, update)
+	if err != nil {
+		return c.Status(http.StatusInternalServerError).JSON(responses.UserResponse{Status: http.StatusInternalServerError, Message: "error", Data: &fiber.Map{"data": err.Error()}})
+	}
+
+	fmt.Println(result)
 	flowClient, err := HTTPP.NewClient(HTTPP.TestnetHost)
 	base.Handle(err)
 
@@ -253,7 +295,6 @@ func VerfiySubmission(c *fiber.Ctx) error {
 		import FungibleToken from 0x9a0766d93b6608b7
 		import FiatToken from 0xa983fecbed621163
 		import StakingV7 from 0xf3ecf4159841b043
-
 
 		//approve the submission of the staker so they qualify to reward
 		transaction(submissionId: String) {
