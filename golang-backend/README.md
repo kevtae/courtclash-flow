@@ -9,15 +9,15 @@ In cadence folder, you will see list of all smart contract and transcript that i
 
 We have two main [smart contract](https://testnet.flowscan.org/account/0xf3ecf4159841b043)
 1. stakingV8
-⋅⋅* depositStake - function for users to call to deposit their stake and submit their submission of them doing the challenge
-⋅⋅* getStakeBalance - to see total usdc staked in a contract
-⋅⋅* getStakers - to see all the people who has stake
-⋅⋅* Admin privileges
-⋅⋅⋅* approveSubmission - Approving the submission based on our [dashboard](https://github.com/kevtae/courtclash-flow/tree/master/dashboard/dashboard)
-⋅⋅⋅* distributeStake - function to distribute stakes back to the winners
+    1. depositStake - function for users to call to deposit their stake and submit their submission of them doing the challenge
+    2. getStakeBalance - to see total usdc staked in a contract
+    3. getStakers - to see all the people who has stake
+    4. Admin privileges
+        1. approveSubmission - Approving the submission based on our [dashboard](https://github.com/kevtae/courtclash-flow/tree/master/dashboard/dashboard)
+        2. distributeStake - function to distribute stakes back to the winners
 2. usdcVault
-⋅⋅* setupVault - function that gets called when they sign up with email, and we initalize their addres to receive usdc Vault
-⋅⋅* transferUSDCvault - when they make credit card purchase on app, and we automatically convert and transfer the usdc to their account
-⋅⋅* getVaultAmount - to see total balance of vault for transparency 
+    1. setupVault - function that gets called when they sign up with email, and we initalize their addres to receive usdc Vault
+    2. transferUSDCvault - when they make credit card purchase on app, and we automatically convert and transfer the usdc to their account
+    3. getVaultAmount - to see total balance of vault for transparency 
 
 
